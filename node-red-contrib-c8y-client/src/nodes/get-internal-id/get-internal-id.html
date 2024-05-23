@@ -5,7 +5,13 @@
         defaults: {
             
             name: {value:""},
-            c8yconfig: {value:"", type:"c8yconfig"},
+            c8yconfig: {
+                value:"", 
+                type:"c8yconfig", 
+                validate: function(v){
+                    return ($('#node-input-useenv').is(':checked') || v) 
+                }
+            },
             useenv: {value: false},
             
             externalid: {

@@ -156,10 +156,12 @@ module.exports = function(RED) {
           text: "Connecting...",
         });
 
-        url = `wss://${node.C8Y_BASEURL.replace(
-          /(^\w+:|^)\/\//,
-          ""
-        )}/notification2/consumer/?token=${node.token}`;
+        function httpUrlToWebSockeUrl(url) {
+          return url.replace(/(http)(s)?\:\/\//, "ws$2://");
+        }
+        const wsurl = httpUrlToWebSockeUrl(node.C8Y_BASEURL);
+        node.debug("Connecting to websocket: " + wsurl);
+        url = `${wsurl}/notification2/consumer/?token=${node.token}`;
         node.socket = new Websocket(url);
         node.socket.clientId = node.clientId;
         node.socket.onopen = function (e) {
@@ -360,7 +362,7 @@ module.exports = function(RED) {
           }
 
           //
-        } else if (cmd == "getDevices" && node &&  node.c8yconfig ) {
+        } else if (cmd == "getDevices" && node &&  node.client ) {
             try {
               const filter = {
                 fragmentType: "c8y_IsDevice",

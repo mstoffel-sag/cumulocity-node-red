@@ -18,8 +18,8 @@
       "realtime": "src/nodes/realtime/realtime.js",
       "notification": "src/nodes/notification/notification.js",
       "c8yconfig": "src/nodes/c8y-config/c8y-config.js",
-      "c8y-http-auth": "src/nodes/c8y-http-auth/c8y-http-auth.js",
-      "c8y-check-roles": "src/nodes/c8y-check-roles/c8y-check-roles.js"
+      "http-auth": "src/nodes/http-auth/http-auth.js",
+      "check-roles": "src/nodes/check-roles/check-roles.js"
     }
   },
   "dependencies": {

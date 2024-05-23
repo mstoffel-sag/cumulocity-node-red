@@ -5,7 +5,13 @@
         color: '#45c4ba',
         defaults: {
             name: {value:""},
-            c8yconfig: {value:"", type:"c8yconfig", required: true},
+            c8yconfig: {
+                value:"", 
+                type:"c8yconfig", 
+                validate: function(v){
+                    return ($('#node-input-useenv').is(':checked') || v) 
+                }
+            },
             useenv: {value: false},
             subscription: {value:"", required: true},
             subscriber: {value:"", required: true},
@@ -35,6 +41,13 @@
         oneditprepare: function () {
           console.log("node.deviceIds: " , this.deviceIds);
                 var node = this;
+                 $('#node-input-useenv').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#c8yconfig-row').hide();
+                } else {
+                    $('#c8yconfig-row').show();
+                }
+            });
                 function getDevices(devs) {
                     $('#node-input-context').typedInput({
                         default: 'Select',
@@ -99,7 +112,6 @@
                     ]
                     });
                 }
-                if (node.c8yconfig ) {
                     $.ajax({
                         url: 'notification/' + node.id +'/getDevices',
                         cache: false,
@@ -113,10 +125,6 @@
                             console.error("Error: " , error);
                         }
 		            });
-                }else{
-                    console.debug("No config found. Skipping.");
-                }
-                
         },
     });
 </script>
