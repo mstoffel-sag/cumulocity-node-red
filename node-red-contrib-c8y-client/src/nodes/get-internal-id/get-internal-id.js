@@ -1,5 +1,5 @@
 
-const {createDeviceandAddExternalId, getCredentials} = require("../c8y-utils/c8y-utils");
+const {getCredentials} = require("../c8y-utils/c8y-utils");
 
 module.exports = function(RED) {
     function GetInternalIdCallNode(config) {
@@ -8,6 +8,73 @@ module.exports = function(RED) {
         node.config = config;
         node.c8yconfig = RED.nodes.getNode(node.config.c8yconfig);
         getCredentials(RED,node);
+
+        node.createDeviceandAddExternalId = async function createDeviceandAddExternalId(
+          node,
+          mo,
+          externalId,
+          type
+          ) {
+          const fetchOptions = {
+            method: "POST",
+            body: JSON.stringify(mo),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          };
+          //Create Device
+          const resCreateMo = await node.client.core.fetch(
+            "/inventory/managedObjects",
+            fetchOptions
+          );
+          try {
+            createMoJson = await resCreateMo.json();
+          } catch (error) {
+            node.error(error);
+            return "error";
+          }
+          let id = "";
+          if (resCreateMo.status == 201) {
+            node.trace("createMoJson: " + JSON.stringify(createMoJson));
+            id = createMoJson.id;
+            fetchOptions.body = JSON.stringify({
+              externalId: externalId,
+              type: type,
+            });
+            // Create External id
+            if (externalId !== undefined) {
+              const resCreateExternal = await node.client.core.fetch(
+                "/identity/globalIds/" + id + "/externalIds",
+                fetchOptions
+              );
+              try {
+                createExtJson = await resCreateExternal.json();
+              } catch (error) {
+                node.error(error);
+                return "error";
+              }
+              node.trace("createExtJson: " + JSON.stringify(createExtJson));
+              if (resCreateExternal.status == 201) {
+                node.log(
+                  "ExternalId: " + externalId + " attached to ManagedObject: " + id
+                );
+              } else {
+                node.error(
+                  "Could not create ExternalId: " +
+                    resCreateExternal.status +
+                    " " +
+                    resCreateExternal.statusText
+                );
+                return "error";
+              }
+            }
+            return id;
+          } else {
+            return "error";
+          }
+        };
+
         node.on('input', async function(msg) {
           try {
             // Get properties
@@ -87,7 +154,7 @@ module.exports = function(RED) {
                   };
                 }
                 node.debug("ManagedObject to create: ", mo);
-                msg.payload = await createDeviceandAddExternalId(
+                msg.payload = await node.createDeviceandAddExternalId(
                   node,
                   mo,
                   externalId,

@@ -61,5 +61,5 @@ module.exports = function(RED) {
             node.error(e, "Failed to parse roles array");
         }
     }
-    RED.nodes.registerType("c8y-check-roles", C8yCheckRolesNode);
+    RED.nodes.registerType("check-roles", C8yCheckRolesNode);
 }

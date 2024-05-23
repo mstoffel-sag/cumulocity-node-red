@@ -12,7 +12,6 @@ module.exports = function(RED) {
         try {
             const auth = new c8yClientLib.BasicAuth({tenant: node.C8Y_TENANT, user: node.C8Y_USER, password: node.C8Y_PASSWORD});
             node.on('input', function(msg) {
-                console.log("msg: ", auth.getFetchOptions(msg));
                 node.send(auth.getFetchOptions(msg));
             });
             
@@ -20,5 +19,5 @@ module.exports = function(RED) {
             node.error(error);
         }
     }
-    RED.nodes.registerType("c8y-http-auth", C8yHTTPAuthNode);
+    RED.nodes.registerType("http-auth", C8yHTTPAuthNode);
 }
