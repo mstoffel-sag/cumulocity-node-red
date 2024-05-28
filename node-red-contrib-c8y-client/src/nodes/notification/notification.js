@@ -86,13 +86,11 @@ module.exports = function (RED) {
         
         if (node.subscription && node.deviceIds) {
           let filterResults = [];  
-          await node.deviceIds.map( async (deviceId) =>
-             await filterResults.push(node.postFilter(filter, deviceId))
+          node.deviceIds.map((deviceId) =>
+             filterResults.push(node.postFilter(filter, deviceId))
           );
-          console.log("fres:" , filterResults);
-          await Promise.all(filterResults).then((res) => {
-            console.log("Returning filterresults", res);
-            return Promise.resolve(res);
+          return Promise.all(filterResults).then((res) => {
+              return Promise.resolve(res);
           });
 
         } else {
@@ -131,18 +129,9 @@ module.exports = function (RED) {
           .then(
             (res) => {
               if (res.status == 201) {
-                console.log("Filter " + localFilter + " created " + res.statusText);
                 return Promise.resolve("Filter " + localFilter + " created " + res.statusText);
               } else {
-                console.log(
-                "Error creating filter. " +
-                  res.status +
-                  " " +
-                  res.statusText +
-                  " Filter: " +
-                  JSON.stringify(localFilter)
-              )
-                return Promise.resolve(
+                  return Promise.resolve(
                   "Error creating filter. " +
                     res.status +
                     " " +
