@@ -60,7 +60,7 @@ module.exports = function (RED) {
       return;
     }
 
-    node.createFilter =  function () {
+    node.createFilter = async  function () {
       try {
         // Filter template
         let filter = {
@@ -85,22 +85,22 @@ module.exports = function (RED) {
         }
         
         if (node.subscription && node.deviceIds) {
-          const filterResults =node.deviceIds.map((deviceId) =>
-            node.postFilter(filter, deviceId)
+          let filterResults = [];  
+          await node.deviceIds.map( async (deviceId) =>
+             await filterResults.push(node.postFilter(filter, deviceId))
           );
-          Promise.all(filterResults).then((res) => {
-            console.log("Promises all:", res);
+          console.log("fres:" , filterResults);
+          await Promise.all(filterResults).then((res) => {
+            console.log("Returning filterresults", res);
             return Promise.resolve(res);
           });
 
         } else {
-          node.error("Subscriber, Subscription or filter was undefined");
           return Promise.reject(
             "Subscriber, Subscription or filter was undefined"
           );
         }
       } catch (error) {
-        node.error("createFilter: " + error);
         return Promise.reject(
           error
         );
@@ -110,16 +110,13 @@ module.exports = function (RED) {
     // Create filter in Cumulocity
     node.postFilter = function (filter, deviceId) {
       const localFilter = { ...filter };
-      console.log(`postfilter filter: ${JSON.stringify(filter)} deviceid ${deviceId}` );
       if (!isNaN(parseInt(deviceId))) {
         localFilter.source = {};
         localFilter.source.id = deviceId;
       } else {
-        node.error("deviceId not numeric skipping.")
         return  Promise.reject("deviceId not numeric skipping.");
       }
       localFilter.subscription = node.subscription;
-      console.log(`postfilter filter localFilter: ${JSON.stringify(localFilter)}` );
       try {
         const fetchOptions = {
           method: "POST",
@@ -134,27 +131,33 @@ module.exports = function (RED) {
           .then(
             (res) => {
               if (res.status == 201) {
-                return Promise.resolve("Filter created" + res.statusText);
-                node.debug("Filter created");
+                console.log("Filter " + localFilter + " created " + res.statusText);
+                return Promise.resolve("Filter " + localFilter + " created " + res.statusText);
               } else {
+                console.log(
+                "Error creating filter. " +
+                  res.status +
+                  " " +
+                  res.statusText +
+                  " Filter: " +
+                  JSON.stringify(localFilter)
+              )
                 return Promise.resolve(
-                  "Creating filter. " +
+                  "Error creating filter. " +
                     res.status +
                     " " +
                     res.statusText +
                     " Filter: " +
-                    JSON.stringify(filter)
-                )
+                    JSON.stringify(localFilter)
+                    );
               }
             },
             (error) => {
               return Promise.resolve("postFilter" + error);
-              node.error("postFilter" + error);
             }
           );
       } catch (error) {
-        return Promise.resolve("postFilter" + error);
-        node.error("postFilter: " + error);
+        return Promise.reject("postFilter" + error);
       }
     };
 
@@ -226,18 +229,18 @@ module.exports = function (RED) {
           text: `Disconnected: code=${event.code} ${event.reason}`,
         });
         node.debug(`[ws close] code=${event.code} reason=${event.reason}`);
-        if (node.reconnectCount > 5 && node.reconnectTimeout < 600000) {
-          node.reconnectTimeout = node.reconnectTimeout * node.reconnectCount;
-          node.debug(
-            "new reconnect timeout: " + node.reconnectTimeout / 1000 + " s"
-          );
-        }
+        // if (node.reconnectCount > 5 && node.reconnectTimeout < 600000) {
+        //   node.reconnectTimeout = node.reconnectTimeout * node.reconnectCount;
+        //   node.debug(
+        //     "new reconnect timeout: " + node.reconnectTimeout / 1000 + " s"
+        //   );
+        // }
         if (event.code !== 1000) {
-          // setTimeout(function () {
-          //   node.error(`Reconnecting..... Retries ${node.reconnectCount}`);
-          //   node.reconnectCount = ++node.reconnectCount;
-          //   node.subscribeWS(token);
-          // }, node.reconnectTimeout);
+          setTimeout(function () {
+            node.error(`Reconnecting..... Retries ${node.reconnectCount}`);
+            node.reconnectCount = ++node.reconnectCount;
+            node.subscribeWS(token);
+          }, node.reconnectTimeout);
         }
       };
 
@@ -256,7 +259,7 @@ module.exports = function (RED) {
       };
     };
 
-    node.getToken =  function () {
+    node.getToken =  async function () {
       node.debug(
         `Get Token for : Subscription: ${node.subscription}  Subscriber: ${node.subscriber}`
       );
@@ -273,36 +276,28 @@ module.exports = function (RED) {
             Accept: "application/json",
           },
         };
-        async function getRes(fetchOptions){
-          let c8yres = undefined;
+
+        let c8yres = undefined;
+        try {
+          c8yres = await node.client.core.fetch(
+            "notification2/token",
+            fetchOptions
+          );
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        if (c8yres.status == 200) {
           try {
-            c8yres = await node.client.core.fetch(
-              "notification2/token",
-              fetchOptions
-            );
+            json = await c8yres.json();
+            node.debug("Token received");
+            return Promise.resolve(json.token);
           } catch (error) {
-            node.error("Fetch Token: " + error);
             return Promise.reject(error);
           }
-          if (c8yres.status == 200) {
-            try {
-              json = await c8yres.json();
-              node.debug("Token received" + json.token);
-              //node.token = json.token;
-              return Promise.resolve(json.token);
-            } catch (error) {
-              node.error("get token json: " + error);
-              return Promise.reject(error);
-            }
-          } else {
-            node.error("Fetch Token: " + c8yres.status);
-            return Promise.reject("Fetch Token: " + c8yres.status);
-          }
-
+        } else {
+          return Promise.reject("Fetch Token: " + c8yres.status);
         }
-        return getRes(fetchOptions);
       } else {
-        node.error("Subscriber, Subscription was undefined");
         return Promise.reject("Subscriber, Subscription was undefined");
       }
     };
@@ -324,42 +319,28 @@ module.exports = function (RED) {
       }
     };
 
-    node.subscribeNotificationInner = async function () {
-      let token = false;
-      try {
-        const filteresult = await node.createFilter();
-        node.debug("FilterResult : " , filteresult);
-  
-        token = await node.getToken();
-        
-      } catch (error) {
-        node.error("try filter token: " +error);
-        return Promise.resolve(false);
-      }
-      node.debug("Token in subscribeNotificaiton: " + token);
-      if (token) {
-        node.debug("Found Token opening websocket." );
-        node.subscribeWS(token);
-        return Promise.resolve(true);
-      } else {
-        return Promise.resolve(false);
-      }
-    };
-
     node.sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
     node.subscribeNotification = async function () {
       success = false;
       while (!success) {
-          success = await node.subscribeNotificationInner();
-
-          if (success) {
-            node.debug("success true");
-          }else{
-            node.debug("success false wait and retry");
+        let token = false;
+        try {
+          const filteresult =  await node.createFilter();
+          console.log("FilterResult : " , filteresult);
+          token = await node.getToken();
+        } catch (error) {
+          node.error(error);
+        }
+        if (token) {
+          node.subscribeWS(token);
+          success = true;
+        }else{
+            node.debug("Wait and retry");
             await node.sleep(5000);
-          }
+        }
       }
-      node.debug("while end");
+      node.debug("SubscribeNotification successfull");
     };
     // start node
 
