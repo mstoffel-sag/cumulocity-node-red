@@ -60,7 +60,7 @@ module.exports = function (RED) {
       return;
     }
 
-    node.createFilter = async  function () {
+    node.createFilter = async function () {
       try {
         // Filter template
         let filter = {
@@ -83,22 +83,20 @@ module.exports = function (RED) {
           node.debug("Remove deviceIds since tenant context");
           node.deviceIds = [""];
         }
-        
+
         if (node.subscription && node.deviceIds) {
-          let filterResults = [];  
+          let filterResults = [];
           node.deviceIds.map((deviceId) =>
-             filterResults.push(node.postFilter(filter, deviceId))
+            filterResults.push(node.postFilter(filter, deviceId))
           );
-          return Promise.allSettled(filterResults).then(res => res);
+          return Promise.allSettled(filterResults).then((res) => res);
         } else {
           return Promise.reject(
             "Subscriber, Subscription or filter was undefined"
           );
         }
       } catch (error) {
-        return Promise.reject(
-          error
-        );
+        return Promise.reject(error);
       }
     };
 
@@ -109,7 +107,7 @@ module.exports = function (RED) {
         localFilter.source = {};
         localFilter.source.id = deviceId;
       } else {
-        return  Promise.reject("deviceId not numeric skipping.");
+        return Promise.reject("deviceId not numeric skipping.");
       }
       localFilter.subscription = node.subscription;
       try {
@@ -121,22 +119,22 @@ module.exports = function (RED) {
             Accept: "application/json",
           },
         };
-        node.log("Creating Filter: " + JSON.stringify(localFilter));
         return node.client.core
           .fetch("notification2/subscriptions/", fetchOptions)
           .then(
             (res) => {
               if (res.status == 201) {
-                return Promise.resolve("Filter " + localFilter + " created " + res.statusText);
+                return Promise.resolve(
+                  `Filter  ${JSON.stringify(localFilter)} created Status ${
+                    res.statusText
+                  }`
+                );
               } else {
-                  return Promise.reject(
-                  "Error creating filter. " +
-                    res.status +
-                    " " +
-                    res.statusText +
-                    " Filter: " +
-                    JSON.stringify(localFilter)
-                    );
+                return Promise.reject(
+                  `Error creating filter. ${res.status} ${
+                    res.statusText
+                  } Filter: ${JSON.stringify(localFilter)})`
+                );
               }
             },
             (error) => {
@@ -149,7 +147,7 @@ module.exports = function (RED) {
     };
 
     // will get a token and start the websocket connection. Handles reconnection
-    node.subscribeWS =  (token) => {
+    node.subscribeWS = (token) => {
       node.status({
         fill: "green",
         shape: "ring",
@@ -174,7 +172,7 @@ module.exports = function (RED) {
           shape: "dot",
           text: "Connected",
         });
-        node
+        node;
         node.heartBeatReference = setInterval(() => {
           node.socket.ping();
           node.debug("Ping websocket...");
@@ -216,12 +214,12 @@ module.exports = function (RED) {
           text: `Disconnected: code=${event.code} ${event.reason}`,
         });
         node.debug(`[ws close] code=${event.code} reason=${event.reason}`);
-        // if (node.reconnectCount > 5 && node.reconnectTimeout < 600000) {
-        //   node.reconnectTimeout = node.reconnectTimeout * node.reconnectCount;
-        //   node.debug(
-        //     "new reconnect timeout: " + node.reconnectTimeout / 1000 + " s"
-        //   );
-        // }
+        if (node.reconnectCount > 5 && node.reconnectTimeout < 600000) {
+          node.reconnectTimeout = node.reconnectTimeout * node.reconnectCount;
+          node.debug(
+            "new reconnect timeout: " + node.reconnectTimeout / 1000 + " s"
+          );
+        }
         if (event.code !== 1000) {
           setTimeout(function () {
             node.error(`Reconnecting..... Retries ${node.reconnectCount}`);
@@ -246,7 +244,7 @@ module.exports = function (RED) {
       };
     };
 
-    node.getToken =  async function () {
+    node.getToken = async function () {
       node.debug(
         `Get Token for : Subscription: ${node.subscription}  Subscriber: ${node.subscriber}`
       );
@@ -279,10 +277,10 @@ module.exports = function (RED) {
             node.debug("Token received");
             return json.token;
           } catch (error) {
-            throw (error);
+            throw error;
           }
         } else {
-          throw "Fetch Token: " + c8yres.status + " " +c8yres.statusText;
+          throw "Fetch Token: " + c8yres.status + " " + c8yres.statusText;
         }
       } else {
         throw "Subscriber, Subscription was undefined";
@@ -313,12 +311,12 @@ module.exports = function (RED) {
       while (!success) {
         let token = false;
         try {
-          const filteresult =  await node.createFilter();
-          filteresult.map(f => {
-            if (f.status == "rejected"){
-              node.error("FilterResult :  " + f.reason)
-            }else{
-              node.debug("FilterResult: " + f.reason)
+          const filteresult = await node.createFilter();
+          filteresult.map((f) => {
+            if (f.status == "rejected") {
+              node.error(`FilterResult: ${f.reason}`);
+            } else {
+              node.log(`FilterResult: ${f.value}`);
             }
           });
           token = await node.getToken();
@@ -328,9 +326,9 @@ module.exports = function (RED) {
         if (token) {
           node.subscribeWS(token);
           success = true;
-        }else{
-            node.debug("Wait and retry");
-            await node.sleep(node.reconnectTimeout);
+        } else {
+          node.debug("Wait and retry");
+          await node.sleep(node.reconnectTimeout);
         }
       }
       node.debug("SubscribeNotification successfull");
