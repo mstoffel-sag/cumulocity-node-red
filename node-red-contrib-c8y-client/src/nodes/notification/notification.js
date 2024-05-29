@@ -89,10 +89,7 @@ module.exports = function (RED) {
           node.deviceIds.map((deviceId) =>
              filterResults.push(node.postFilter(filter, deviceId))
           );
-          return Promise.all(filterResults).then((res) => {
-              return Promise.resolve(res);
-          });
-
+          return Promise.allSettled(filterResults).then(res => res);
         } else {
           return Promise.reject(
             "Subscriber, Subscription or filter was undefined"
@@ -124,6 +121,7 @@ module.exports = function (RED) {
             Accept: "application/json",
           },
         };
+        node.log("Creating Filter: " + JSON.stringify(localFilter));
         return node.client.core
           .fetch("notification2/subscriptions/", fetchOptions)
           .then(
@@ -131,7 +129,7 @@ module.exports = function (RED) {
               if (res.status == 201) {
                 return Promise.resolve("Filter " + localFilter + " created " + res.statusText);
               } else {
-                  return Promise.resolve(
+                  return Promise.reject(
                   "Error creating filter. " +
                     res.status +
                     " " +
@@ -142,7 +140,7 @@ module.exports = function (RED) {
               }
             },
             (error) => {
-              return Promise.resolve("postFilter" + error);
+              return Promise.reject("postFilter" + error);
             }
           );
       } catch (error) {
@@ -273,21 +271,21 @@ module.exports = function (RED) {
             fetchOptions
           );
         } catch (error) {
-          return Promise.reject(error);
+          throw error;
         }
         if (c8yres.status == 200) {
           try {
             json = await c8yres.json();
             node.debug("Token received");
-            return Promise.resolve(json.token);
+            return json.token;
           } catch (error) {
-            return Promise.reject(error);
+            throw (error);
           }
         } else {
-          return Promise.reject("Fetch Token: " + c8yres.status);
+          throw "Fetch Token: " + c8yres.status + " " +c8yres.statusText;
         }
       } else {
-        return Promise.reject("Subscriber, Subscription was undefined");
+        throw "Subscriber, Subscription was undefined";
       }
     };
 
@@ -316,7 +314,13 @@ module.exports = function (RED) {
         let token = false;
         try {
           const filteresult =  await node.createFilter();
-          console.log("FilterResult : " , filteresult);
+          filteresult.map(f => {
+            if (f.status == "rejected"){
+              node.error("FilterResult :  " + f.reason)
+            }else{
+              node.debug("FilterResult: " + f.reason)
+            }
+          });
           token = await node.getToken();
         } catch (error) {
           node.error(error);
@@ -326,7 +330,7 @@ module.exports = function (RED) {
           success = true;
         }else{
             node.debug("Wait and retry");
-            await node.sleep(5000);
+            await node.sleep(node.reconnectTimeout);
         }
       }
       node.debug("SubscribeNotification successfull");
