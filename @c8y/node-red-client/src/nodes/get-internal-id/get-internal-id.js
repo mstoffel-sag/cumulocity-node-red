@@ -99,82 +99,87 @@ module.exports = function(RED) {
                 );
               }
               node.debug("Config: " + node.C8Y_TENANT + node.C8Y_BASEURL + node.C8Y_PASSWORD + node.C8Y_USER);
-              } catch (error) {
-                node.error("Extracting Properties " +error);
+              if (externalId === undefined) {
+                node.error( "Error externalId is undefined.");
                 return;
               }
-          if (externalId === undefined) {
-            node.error( "Error externalId is undefined.");
-            return;
-          }
-          if (externalIdType === undefined) {
-            node.error( "Error externalIdType is undefined.");
-            return;
-          }
-          const fetchOptions = {
-            method: "GET",
-            body: undefined,
-            headers: msg.headers || {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          };
-          //Get internalId from external
-          const res = await node.client.core.fetch(
-            "/identity/externalIds/" + externalIdType + "/" + externalId,
-            fetchOptions
-          );
-          msg.status = res.status;
-          delete msg.body;
-          delete msg.headers;
-
-          if (msg.status == 200) {
-            try {
-              json = await res.json();
-              msg.payload = json.managedObject.id;
-              node.debug(`Sending Message: ${JSON.stringify(msg)}`);
-              node.send(msg);
+              if (externalIdType === undefined) {
+                node.error( "Error externalIdType is undefined.");
+                return;
+              }
             } catch (error) {
-              node.error(error);
+              node.error("Extracting Properties " +error);
               return;
             }
-          } else {
-            if (msg.status == 404) {
-              if (node.config.createdevice) {
-                // create deivce
-                if (params === undefined) {
-                  var mo = {
-                    c8y_IsDevice: {},
-                    name: "Node-Red-Device-" + externalId,
-                  };
-                } else {
-                  var mo = {
-                    c8y_IsDevice: {},
-                    ...params,
-                  };
-                }
-                node.debug("ManagedObject to create: ", mo);
-                msg.payload = await node.createDeviceandAddExternalId(
-                  node,
-                  mo,
-                  externalId,
-                  externalIdType
-                );
-                node.debug("Internal Id: " + msg.payload);
-                if (typeof msg.payload != "error") {
-                  node.send(msg);
-                  return;
-                } else {
-                  node.error("ExternalId not found: " + error);
-                  return;
+          try {
+            const fetchOptions = {
+              method: "GET",
+              body: undefined,
+              headers: msg.headers || {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+            };
+            //Get internalId from external
+            const res = await node.client.core.fetch(
+              "/identity/externalIds/" + externalIdType + "/" + externalId,
+              fetchOptions
+            );
+            msg.status = res.status;
+            delete msg.body;
+            delete msg.headers;
+  
+            if (msg.status == 200) {
+              try {
+                json = await res.json();
+                msg.payload = json.managedObject.id;
+                node.debug(`Sending Message: ${JSON.stringify(msg)}`);
+                node.send(msg);
+              } catch (error) {
+                node.error(error);
+                return;
+              }
+            } else {
+              if (msg.status == 404) {
+                if (node.config.createdevice) {
+                  // create deivce
+                  if (params === undefined) {
+                    var mo = {
+                      c8y_IsDevice: {},
+                      name: "Node-Red-Device-" + externalId,
+                    };
+                  } else {
+                    var mo = {
+                      c8y_IsDevice: {},
+                      ...params,
+                    };
+                  }
+                  node.debug("ManagedObject to create: ", mo);
+                  msg.payload = await node.createDeviceandAddExternalId(
+                    node,
+                    mo,
+                    externalId,
+                    externalIdType
+                  );
+                  node.debug("Internal Id: " + msg.payload);
+                  if (typeof msg.payload != "error") {
+                    node.send(msg);
+                    return;
+                  } else {
+                    node.error("ExternalId not found: " + error);
+                    return;
+                  }
+                }else{
+                node.error("Get InternalId Response: " + res.status + " " + res.statusText);
+                return;
                 }
               }else{
-              node.error("Get InternalId Response: " + res.status + " " + res.statusText);
-              return;
+                node.error(res.statusText + " " + res.status);
               }
-            }else{
-              node.error(res.statusText + " " + res.status);
             }
+            
+          } catch (error) {
+            node.error("Get-Internal-Id: " +error);
           }
       });
     }

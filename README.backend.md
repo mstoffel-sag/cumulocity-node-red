@@ -55,7 +55,7 @@ Within the `cumulocity.json` you can find underneath the `requiredRoles` attribu
 You can add all the desired roles to this array in case you need more.
 
 ## Data persistence
-To persist the created flows and store settings the microservice uses a [custom storage plugin](data/node-red-c8y-storage-plugin/README.md) for Node-RED to store those settings within Cumulocity's inventory.
+To persist the created flows and store settings the microservice uses a [custom storage plugin](data/node-red-storage-plugin/README.md) for Node-RED to store those settings within Cumulocity's inventory.
 
 ## :bangbang: Credential encryption :bangbang:
 As credentials are as well stored within cumulocity (encrypted tenant option), please make sure that all users who somehow have access to the those encrypted tenant options are also allowed to see those credentials.
@@ -69,4 +69,4 @@ You can use these environment variables directly within the your MQTT credential
 The `MQTT_USER` follows the following schema: `<tenantId>/<username>`.
 
 ## Default nodes
-Prepackaged with this Node-RED microservice you are also receiving some [basic Cumulocity nodes](data/node-red-contrib-c8y-client/README.md).
+Prepackaged with this Node-RED microservice you are also receiving some [ Cumulocity nodes](data/node-red-client/README.md).

@@ -5,7 +5,7 @@ module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: process.env.SERVER_PORT || 80,
     credentialSecret: 'REPLACE ME',
-    storageModule : require("node-red-c8y-storage-plugin"),
+    storageModule : require("@c8y/node-red-storage-plugin"),
     storageModuleOptions: {
         c8yUrl: process.env.C8Y_BASEURL,
         tenant: process.env.C8Y_BOOTSTRAP_TENANT,

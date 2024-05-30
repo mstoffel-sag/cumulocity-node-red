@@ -9,7 +9,7 @@
                 value:"", 
                 type:"c8yconfig", 
                 validate: function(v){
-                    return ($('#node-input-useenv').is(':checked') || v) 
+                    return (this.useenv || v) 
                 }
             },
             useenv: {value: false},

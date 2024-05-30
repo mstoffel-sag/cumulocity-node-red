@@ -37,14 +37,14 @@
       "@semantic-release/npm",
       {
         "npmPublish": false,
-        "pkgRoot": "node-red-contrib-c8y-client"
+        "pkgRoot": "node-red-client"
       }
     ],
     [
       "@semantic-release/npm",
       {
         "npmPublish": false,
-        "pkgRoot": "node-red-c8y-storage-plugin"
+        "pkgRoot": "node-red-storage-plugin"
       }
     ],
     [

@@ -1,9 +1,10 @@
 FROM node:18.20.2-alpine As deps
 WORKDIR /usr/src/app
+RUN mkdir -p ./@c8y
 COPY --chown=root:root ./yarn.lock ./
 COPY --chown=root:root ./package.json ./
-COPY --chown=root:root ./node-red-contrib-c8y-client/package.json ./node-red-contrib-c8y-client/
-COPY --chown=root:root ./node-red-c8y-storage-plugin/package.json ./node-red-c8y-storage-plugin/
+COPY --chown=root:root ./@c8y/node-red-client/package.json ./@c8y/node-red-client/
+COPY --chown=root:root ./@c8y/node-red-storage-plugin/package.json ./@c8y/node-red-storage-plugin/
 
 
 RUN yarn install --frozen-lockfile --immutable --non-interactive --prefer-offline
@@ -24,11 +25,11 @@ USER root
 
 FROM node:18.20.2-alpine As prodDeps
 WORKDIR /usr/src/app
-
+RUN mkdir -p ./@c8y
 COPY --chown=root:root ./yarn.lock ./
 COPY --chown=root:root ./package.json ./
-COPY --chown=root:root ./node-red-contrib-c8y-client/package.json ./node-red-contrib-c8y-client/
-COPY --chown=root:root ./node-red-c8y-storage-plugin/package.json ./node-red-c8y-storage-plugin/
+COPY --chown=root:root ./@c8y/node-red-client/package.json ./@c8y/node-red-client/
+COPY --chown=root:root ./@c8y/node-red-storage-plugin/package.json ./@c8y/node-red-storage-plugin/
 
 ENV NODE_ENV production
 ENV NO_COLOR true
@@ -43,7 +44,7 @@ WORKDIR /usr/src/app
 COPY --chown=root:root --from=prodDeps /usr/src/app/ ./
 COPY --chown=root:root ./ ./
 #COPY --chown=root:root --from=build /usr/src/app/node-red-contrib-c8y-client/dist/ ./node-red-contrib-c8y-client/dist/
-COPY --chown=root:root --from=build /usr/src/app/node-red-c8y-storage-plugin/lib/ ./node-red-c8y-storage-plugin/lib/
+COPY --chown=root:root --from=build /usr/src/app/@c8y/node-red-storage-plugin/lib/ ./@c8y/node-red-storage-plugin/lib/
 
 ENV NODE_ENV production
 ENV NO_COLOR true

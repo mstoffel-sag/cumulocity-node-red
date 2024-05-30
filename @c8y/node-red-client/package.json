@@ -1,5 +1,5 @@
 {
-  "name": "node-red-contrib-c8y-client",
+  "name": "@c8y/node-red-client",
   "version": "2.2.2",
   "description": "c8y client for Node-RED",
   "main": "index.js",
@@ -8,7 +8,8 @@
   },
   "keywords": [
     "node-red",
-    "c8y"
+    "c8y",
+    "cumulocity"
   ],
   "node-red": {
     "version": ">=2.0.0",
