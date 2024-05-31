@@ -131,4 +131,4 @@ dist
 
 *.zip
 *.tar
-@c8y/node-red-client/env.list.local
+/node-red-contrib-c8y-client/env.list.local

@@ -1,5 +1,5 @@
 {
-  "name": "@c8y/node-red-client",
+  "name": "node-red-contrib-c8y-client",
   "version": "2.2.2",
   "description": "c8y client for Node-RED",
   "main": "index.js",

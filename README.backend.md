@@ -69,4 +69,4 @@ You can use these environment variables directly within the your MQTT credential
 The `MQTT_USER` follows the following schema: `<tenantId>/<username>`.
 
 ## Default nodes
-Prepackaged with this Node-RED microservice you are also receiving some [ Cumulocity nodes](data/node-red-client/README.md).
+Prepackaged with this Node-RED microservice you are also receiving some [ Cumulocity nodes](cumulocity-node-red-ui/README.md).
