@@ -31,5 +31,7 @@ To test and restart node-red on file changes in development you can use nodemon 
 
     nodemon --watch ./ -e js,html,json --exec "node-red"
 
+To test Use Env switch you can edit env.list.default to your values and source the file like . ./env.list.default
+
 
 
