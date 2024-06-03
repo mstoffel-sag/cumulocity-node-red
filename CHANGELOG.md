@@ -1,16 +1,16 @@
-# 1.0.0 (2024-06-01)
+## [2.2.4](https://github.com/SoftwareAG/cumulocity-node-red/compare/v2.2.3...v2.2.4) (2024-05-24)
 
 
 ### Bug Fixes
 
-* add missing ui package to releases ([aef2ec5](https://github.com/mstoffel-sag/cumulocity-node-red/commit/aef2ec541e8e28aa5381a1d36d01015ebeb6e859))
-* **microservice:** resolve issue if microservice is installed for the first time on tenant ([c157e27](https://github.com/mstoffel-sag/cumulocity-node-red/commit/c157e277f8b1d41c6b3557671183781412ec4501))
-* root issue ([#158](https://github.com/mstoffel-sag/cumulocity-node-red/issues/158)) ([e122c20](https://github.com/mstoffel-sag/cumulocity-node-red/commit/e122c2076b9b1bbc4265f644e3d1b8cd34ab8113))
+* set iframe src correctly ([f4b10cf](https://github.com/SoftwareAG/cumulocity-node-red/commit/f4b10cf41f14616efa6b6017b2aa995b62b52f95))
+
+## [2.2.3](https://github.com/SoftwareAG/cumulocity-node-red/compare/v2.2.2...v2.2.3) (2024-05-24)
 
 
-### Features
+### Bug Fixes
 
-* restructure project ([#182](https://github.com/mstoffel-sag/cumulocity-node-red/issues/182)) ([ce91adc](https://github.com/mstoffel-sag/cumulocity-node-red/commit/ce91adc1335484092bdc27d92202cf63ee75faed))
+* add missing license into UI build ([2d82e20](https://github.com/SoftwareAG/cumulocity-node-red/commit/2d82e20f3aa04dec6c6269cd21e262924719ee91))
 
 ## [2.2.2](https://github.com/SoftwareAG/cumulocity-node-red/compare/v2.2.1...v2.2.2) (2024-05-15)
 
