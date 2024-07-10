@@ -90,6 +90,12 @@ module.exports = function(RED) {
               node,
               msg
               );
+            output = RED.util.evaluateNodeProperty(
+              node.config.output,
+              node.config.outputType,
+              node,
+              msg
+              );
             if (node.config.createdevice) {
               params = RED.util.evaluateNodeProperty(
                 node.config.params,
@@ -132,7 +138,7 @@ module.exports = function(RED) {
             if (msg.status == 200) {
               try {
                 json = await res.json();
-                msg.payload = json.managedObject.id;
+                msg[output] = json.managedObject.id;
                 node.debug(`Sending Message: ${JSON.stringify(msg)}`);
                 node.send(msg);
               } catch (error) {

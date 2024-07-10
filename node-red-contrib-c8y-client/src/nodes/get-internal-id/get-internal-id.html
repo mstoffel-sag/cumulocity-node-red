@@ -13,7 +13,6 @@
                 }
             },
             useenv: {value: false},
-            
             externalid: {
                 value:"",
                 required: true,
@@ -25,6 +24,9 @@
             output: {
                 value:"payload",
                 required: true,
+            },
+            outputType: {
+                value:"str",
             },
             externalidtype: {
                 value: "c8y_Serial",
@@ -73,6 +75,11 @@
                 typeField: $("#node-input-paramsType"),
                 types: ['msg','json']
             });
+            $('#node-input-output').typedInput({
+                default: 'str',
+                typeField: $("#node-input-outputType"),
+                types: ['msg','str']
+            });
             $('#node-input-createdevice').change(function() {
                 
                 if ($(this).is(':checked')) {
@@ -117,6 +124,11 @@
         <input type="hidden" id="node-input-externalidtypeType">
     </div>
     <div class="form-row">
+        <label for="node-input-output"><i class="fa fa-tag"></i> Output</label>
+        <input type="text" id="node-input-output" placeholder="externalId">
+        <input type="hidden" id="node-input-outputType">
+    </div>
+    <div class="form-row">
         <label for="node-input-createdevice"><i class="fa fa-tag"></i> Create Device</label>
         <input type="checkbox" id="node-input-createdevice"/>
     </div>
@@ -142,5 +154,5 @@ Using evironment variables comes in handy if your running inside Cumulocity as a
 : Create Device (checkbox) : If checked a new device will be created using the provided Id and Type. Metadata can be provided using params.
 : Params (JSON String | msg field) : If create device is checked provide metadata as JSON fragment 
 ### outputs
-: payload (JSON string) : The request response will be issued by the node as `msg.payload`
+: Output (string | msg filed) : Which field should the external Id be written to default is msg.payload
 </script>
