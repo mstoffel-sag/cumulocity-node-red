@@ -1,4 +1,4 @@
-# @c8y/node-red-client 
+# node-red-contrib-c8y-client
 
 This package provides nodes to connect to Cumulocity IoT Platform. They can be used inside the Node-Red Cumulocity Micorservice or standalone.
 
