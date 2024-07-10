@@ -1,6 +1,6 @@
 {
   "name": "node-red-c8y-storage-plugin",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "Node-RED c8y Storage Plugin",
   "main": "lib/index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "author": "Tristan Bastian",
   "license": "Apache-2.0",
   "dependencies": {
-    "@c8y/client": "1019.23.8"
+    "@c8y/client": "1020.0.15"
   },
   "devDependencies": {
     "@types/node": "^18",

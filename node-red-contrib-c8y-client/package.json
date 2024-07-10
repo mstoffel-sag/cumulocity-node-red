@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-c8y-client",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "description": "c8y client for Node-RED",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "@c8y/client": "1019.23.8",
+    "@c8y/client": "1020.0.15",
     "uuid": "^9.0.1",
     "ws": "^8.17.0"
   },
