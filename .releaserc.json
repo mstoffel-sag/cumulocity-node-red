@@ -1,5 +1,5 @@
 {
-  "branches": ["main,notification2.0"],
+  "branches": ["main","notification2.0"],
   "tagFormat": "v${version}",
   "plugins": [
     [
