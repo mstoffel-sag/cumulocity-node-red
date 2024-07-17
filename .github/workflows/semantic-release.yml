@@ -39,4 +39,4 @@ jobs:
           GITHUB_URL: ${{ github.server_url }}
           HUSKY: 0
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: semantic-release
+        run: semantic-release --branches notification2.0
