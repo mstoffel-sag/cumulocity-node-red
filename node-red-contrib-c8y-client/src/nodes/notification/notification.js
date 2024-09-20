@@ -184,14 +184,22 @@ module.exports = function (RED) {
           node.debug(
             `New Notification id: ${id} source: ${source} operation: ${operation} \n payload: ${payload}`
           );
-          const msg = {
-            payload: {
-              id: id,
-              source: source,
-              operation: operation,
-              message: JSON.parse(payload),
-            },
-          };
+          let msg;
+          try {
+             msg = {
+              payload: {
+                id: id,
+                source: source,
+                operation: operation,
+                message: JSON.parse(payload),
+              },
+            };
+          } catch (error) {
+            node.error(
+              `[ws error] parsing payload ${error}`
+            ); 
+            return;
+          }
           // Ack message
           try {
             node.socket.send(id);
